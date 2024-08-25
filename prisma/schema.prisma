@@ -27,7 +27,7 @@ model User {
 }
 
 model Barang {
-  id            String   @id @default(uuid())
+  id            String         @id @default(uuid())
   kodeBarang    String
   namaBarang    String
   nomorRegister String
@@ -41,16 +41,54 @@ model Barang {
   foto          String?
   perolehan     String
   imageBarcode  String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  ruanganId     Int?
-  ruangan       Ruangan? @relation(fields: [ruanganId], references: [id])
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  barangKeluar  BarangKeluar[]
+  permintaan    Permintaan[]
+  inventaris    Inventaris[]
 }
 
 model Ruangan {
+  id   Int    @id @default(autoincrement())
+  nama String
+
+  permintaan Permintaan[]
+  inventaris Inventaris[]
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+model Permintaan {
   id        Int      @id @default(autoincrement())
-  nama      String
-  barang    Barang[]
+  qty       Int
+  status    Boolean?
+  barangId  String
+  barang    Barang   @relation(fields: [barangId], references: [id])
+  ruanganId Int
+  ruangan   Ruangan  @relation(fields: [ruanganId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model BarangKeluar {
+  id         Int      @id @default(autoincrement())
+  barangId    String
+  qty        Int
+  tanggal    DateTime @default(now())
+  keterangan String?
+
+  barang Barang @relation(fields: [barangId], references: [id])
+}
+
+model Inventaris {
+  id        Int      @id @default(autoincrement())
+  qty       Int
+  barangId  String
+  barang    Barang   @relation(fields: [barangId], references: [id])
+  ruanganId Int
+  ruangan   Ruangan  @relation(fields: [ruanganId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([barangId, ruanganId])
 }
