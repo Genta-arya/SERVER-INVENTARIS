@@ -7,7 +7,7 @@ import { storage } from "../../Config/Firebase.js";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import formidable from 'formidable';
 const BASE_URL = process.env.BASE_URL || 'http://localhost:5001'; 
-const URL_QR = "192.168.0.2:5173"
+const URL_QR = "https://web-invetaris.vercel.app/"
 // export const handlePostBarang = async (req, res) => {
 //   const {
 //     kodeBarang,

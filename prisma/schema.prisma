@@ -11,7 +11,6 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
-  
 }
 
 model User {
@@ -39,9 +38,9 @@ model Barang {
   hargaBarang   Float
   kondisi       String
   jenis         String
-  foto          String?
+  foto          String?        @db.Text
   perolehan     String
-  imageBarcode  String?
+  imageBarcode  String?        @db.Text
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   barangKeluar  BarangKeluar[]
@@ -73,7 +72,7 @@ model Permintaan {
 
 model BarangKeluar {
   id         Int      @id @default(autoincrement())
-  barangId    String
+  barangId   String
   qty        Int
   tanggal    DateTime @default(now())
   keterangan String?
