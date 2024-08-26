@@ -122,6 +122,7 @@ export const checkLogin = async (req, res) => {
         status: true,
         role: true,
       },
+    
     });
 
     if (!findUser) {
