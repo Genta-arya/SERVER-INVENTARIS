@@ -5,9 +5,9 @@ import fs from "fs/promises";
 import QRCode from "qrcode";
 import { storage } from "../../Config/Firebase.js";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import formidable from 'formidable';
-const BASE_URL = process.env.BASE_URL || 'http://localhost:5001'; 
-const URL_QR = "https://web-invetaris.vercel.app/"
+import formidable from "formidable";
+const BASE_URL = process.env.BASE_URL || "http://localhost:5001";
+const URL_QR = "https://web-invetaris.vercel.app/";
 // export const handlePostBarang = async (req, res) => {
 //   const {
 //     kodeBarang,
@@ -20,9 +20,8 @@ const URL_QR = "https://web-invetaris.vercel.app/"
 //     hargaBarang,
 //     kondisi,
 //     perolehan,
-//     ruanganId, 
+//     ruanganId,
 //   } = req.body;
-
 
 //   const foto = req.file ? `${BASE_URL}/image/${req.file.filename}` : null;
 //   const uploadedFilePath = req.file ? path.join('public', 'image', req.file.filename) : null;
@@ -43,45 +42,39 @@ const URL_QR = "https://web-invetaris.vercel.app/"
 //         kondisi,
 //         foto,
 //         perolehan,
-     
+
 //         ...(ruanganId ? { ruanganId } : {}),
 //       },
 //     });
 
-   
 //     const imageFolderPath = path.join('public', 'image');
 
-  
 //     try {
 //       await fs.access(imageFolderPath);
 //     } catch (error) {
-  
+
 //       await fs.mkdir(imageFolderPath, { recursive: true });
 //     }
 
-   
 //     const qrCodeData = `${URL_QR}/detail/${newBarang.id}`;
 //     const qrCodeImage = await QRCode.toBuffer(qrCodeData, {
-//       errorCorrectionLevel: 'H', 
+//       errorCorrectionLevel: 'H',
 //       type: 'png',
 //       width: 300,
 //     });
 
- 
 //     const qrCodeImagePath = path.join(imageFolderPath,`${namaBarang}-${newBarang.id}.png`);
 //     await fs.writeFile(qrCodeImagePath, qrCodeImage);
 
-  
 //     const qrCodeURL = `${BASE_URL}/image/${namaBarang}-${newBarang.id}.png`;
 //     const updatedBarang = await prisma.barang.update({
 //       where: { id: newBarang.id },
-//       data: { imageBarcode: qrCodeURL }, 
+//       data: { imageBarcode: qrCodeURL },
 //     });
-
 
 //     res.status(201).json(updatedBarang);
 //   } catch (error) {
-    
+
 //     if (uploadedFilePath) {
 //       try {
 //         await fs.unlink(uploadedFilePath);
@@ -90,11 +83,9 @@ const URL_QR = "https://web-invetaris.vercel.app/"
 //       }
 //     }
 
-    
 //     handleError(res, error);
 //   }
 // };
-
 
 export const handlePostBarang = async (req, res) => {
   const {
@@ -108,13 +99,20 @@ export const handlePostBarang = async (req, res) => {
     hargaBarang,
     kondisi,
     perolehan,
-    ruanganId, 
+    ruanganId,
   } = req.body;
 
-  console.log(req.body);
-
-  if (!kodeBarang || !namaBarang || !qty || !hargaBarang) {
-    return res.status(400).json({ message: "Kode, nama, qty, dan harga diperlukan" });
+  if (
+    !kodeBarang ||
+    !namaBarang ||
+    !qty ||
+    !hargaBarang ||
+    !kondisi ||
+    !perolehan
+  ) {
+    return res
+      .status(400)
+      .json({ message: "Kode, nama, qty, dan harga diperlukan" });
   }
 
   let newBarang;
@@ -134,7 +132,6 @@ export const handlePostBarang = async (req, res) => {
         hargaBarang: parseInt(hargaBarang),
         kondisi,
         perolehan,
-        ...(ruanganId ? { ruanganId } : {}),
       },
     });
 
@@ -150,13 +147,16 @@ export const handlePostBarang = async (req, res) => {
       // Generate QR code
       const qrCodeData = `${URL_QR}/detail/${newBarang.id}`;
       const qrCodeImage = await QRCode.toBuffer(qrCodeData, {
-        errorCorrectionLevel: 'H',
-        type: 'png',
+        errorCorrectionLevel: "H",
+        type: "png",
         width: 300,
       });
 
       // Upload QR code ke Firebase Storage
-      const qrStorageRef = ref(storage, `qrcodes/${namaBarang}-${newBarang.id}.png`);
+      const qrStorageRef = ref(
+        storage,
+        `qrcodes/${namaBarang}-${newBarang.id}.png`
+      );
       const qrSnapshot = await uploadBytes(qrStorageRef, qrCodeImage);
       const qrCodeURL = await getDownloadURL(qrSnapshot.ref);
 
@@ -173,10 +173,79 @@ export const handlePostBarang = async (req, res) => {
     // Jika ada kesalahan pada salah satu langkah, hapus data barang yang telah dibuat
     if (newBarang) {
       await prisma.barang.delete({
-        where: { id: newBarang.id }
+        where: { id: newBarang.id },
       });
     }
     // Tangani error dengan benar
+    handleError(res, error);
+  }
+};
+
+export const handleEditBarang = async (req, res) => {
+  const {
+
+    kodeBarang,
+    namaBarang,
+    nomorRegister,
+    merkType,
+    ukuran,
+    qty,
+    jenis,
+    hargaBarang,
+    kondisi,
+    perolehan,
+  } = req.body;
+
+  const {id} = req.params
+  console.log(id)
+
+   if (!id) {
+     return res.status(400).json({ message: "id harus diisi" });
+   }
+
+  if (
+    !kodeBarang ||
+    !namaBarang ||
+    !qty ||
+    !jenis ||
+    !nomorRegister ||
+    !merkType ||
+    !ukuran ||
+    !hargaBarang ||
+    !kondisi ||
+    !perolehan
+  ) {
+    return res.status(400).json({ message: "semua field harus diisi" });
+  }
+
+  try {
+    const findItem = await prisma.barang.findFirst({
+      where: {
+        id: id,
+      },
+    });
+    if (!findItem) {
+      return res.status(404).json({ message: "Barang tidak ditemukan" });
+    } else {
+      await prisma.barang.update({
+        where: { id: id },
+        data: {
+          kodeBarang,
+          namaBarang,
+          nomorRegister,
+          merkType,
+          ukuran,
+          qty: parseInt(qty),
+          jenis,
+          hargaBarang: parseInt(hargaBarang),
+          kondisi,
+          perolehan,
+        },
+      });
+    }
+
+    res.status(200).json({ message: "Barang Berhasil diupdate" });
+  } catch (error) {
     handleError(res, error);
   }
 };
