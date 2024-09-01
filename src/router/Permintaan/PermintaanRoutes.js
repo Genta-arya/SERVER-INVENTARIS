@@ -8,7 +8,7 @@ import {
 
 const PermintaanRouter = express.Router();
 PermintaanRouter.post("/permintaan", addPermintaan);
-PermintaanRouter.get("/permintaan", getPermintaan);
+PermintaanRouter.post("/filter/permintaan", getPermintaan);
 PermintaanRouter.put("/permintaan/:id", updatePermintaan);
 PermintaanRouter.put("/reject/permintaan/:id", RejectPermintaan);
 export default PermintaanRouter;

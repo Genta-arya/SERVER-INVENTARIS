@@ -90,6 +90,9 @@ export const GetSingleRuangan = async (req, res) => {
       },
     });
   } catch (error) {
+    
     handleError(res, error);
+    
+    
   }
 };

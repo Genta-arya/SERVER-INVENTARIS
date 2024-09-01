@@ -3,7 +3,7 @@ import prisma from "./../../../prisma/Config.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET; 
+const JWT_SECRET = process.env.JWT_SECRET;
 export const handleLogin = async (req, res) => {
   const { username, password } = req.body;
 
@@ -16,6 +16,14 @@ export const handleLogin = async (req, res) => {
       where: {
         username: username,
       },
+      select: {
+        id: true,
+        username: true,
+        password: true,
+        token: true,
+        role: true,
+        status: true,
+      },
     });
 
     if (!findUser) {
@@ -27,20 +35,13 @@ export const handleLogin = async (req, res) => {
       return res.status(400).json({ message: "Invalid Credentials" });
     }
 
-    const token = jwt.sign(
-      { id: findUser.id, username: findUser.username },
-      JWT_SECRET,
-      { expiresIn: "3d" }
-    );
+    if (findUser.token === null) {
+      const token = jwt.sign(
+        { id: findUser.id, username: findUser.username },
+        JWT_SECRET,
+        { expiresIn: "3d" }
+      );
 
-    const {
-      password: _,
-      otp: __,
-      token: ___,
-      ...userWithoutSensitiveData
-    } = findUser;
-
-    if (!findUser.token) {
       await prisma.user.update({
         where: {
           id: findUser.id,
@@ -50,22 +51,34 @@ export const handleLogin = async (req, res) => {
           status: true,
         },
       });
-    } else {
-      await prisma.user.update({
-        where: {
-          id: findUser.id,
-        },
-        data: {
-          status: true,
-        },
-      });
     }
+    await prisma.user.update({
+      where: {
+        id: findUser.id,
+      },
+      data: {
+        status: true,
+      },
+    });
+
+    const userUpdate = await prisma.user.findUnique({
+      where: {
+        id: findUser.id,
+      },
+      select: {
+        id: true,
+        username: true,
+
+        token: true,
+        role: true,
+        status: true,
+      },
+    });
 
     return res.status(200).json({
       message: "Login successful",
       data: {
-        user: userWithoutSensitiveData,
-        token: findUser.token,
+        user: userUpdate,
       },
     });
   } catch (error) {
@@ -73,7 +86,7 @@ export const handleLogin = async (req, res) => {
   }
 };
 export const handleRegister = async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, role } = req.body;
 
   if (!username || !password) {
     return res.status(400).json({ message: "All fields are required" });
@@ -86,13 +99,14 @@ export const handleRegister = async (req, res) => {
       },
     });
     if (findUser) {
-      return res.status(400).json({ message: "Username already exists" });
+      return res.status(400).json({ message: "Username sudah digunakan" });
     }
 
     const createUser = await prisma.user.create({
       data: {
         username: username,
         password: hashedPassword,
+        role: role || "admin",
       },
     });
 
@@ -107,7 +121,7 @@ export const handleRegister = async (req, res) => {
 export const checkLogin = async (req, res) => {
   const { token } = req.body;
   if (!token) {
-    return res.status(400).json({ message: "not login" });
+    return res.status(400).json({ message: "Silahkan Login" });
   }
   try {
     const findUser = await prisma.user.findFirst({
@@ -122,14 +136,65 @@ export const checkLogin = async (req, res) => {
         status: true,
         role: true,
       },
-    
     });
 
     if (!findUser) {
-      return res.status(401).json({ message: "not login" });
+      return res.status(401).json({ message: "Silahkan Login" });
     }
 
     return res.status(200).json({ data: findUser });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const getUser = async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      where: {
+        role: {
+          not: "admin",
+        },
+      },
+      select: {
+        id: true,
+        username: true,
+        role: true,
+      },
+    });
+    res.status(200).json({ data: users });
+  } catch (error) {
+    handleError(res, error);
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+
+export const handleLogout = async (req, res) => {
+  const { token } = req.body;
+  if (!token) {
+    return res.status(400).json({ message: "not login" });
+  }
+  try {
+    const findUser = await prisma.user.findFirst({
+      where: {
+        token: token,
+      },
+    });
+    if (!findUser) {
+      return res.status(401).json({ message: "not tidak ditemukan" });
+    }
+
+    await prisma.user.update({
+      where: {
+        id: findUser.id,
+      },
+      data: {
+        token: null,
+        status: false,
+      },
+    });
+    return res.status(200).json({ message: "Logout successful" });
   } catch (error) {
     handleError(res, error);
   }

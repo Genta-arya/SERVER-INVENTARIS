@@ -94,7 +94,7 @@ export const handlePostBarang = async (req, res) => {
     nomorRegister,
     merkType,
     ukuran,
-    qty,
+  
     jenis,
     hargaBarang,
     kondisi,
@@ -104,14 +104,14 @@ export const handlePostBarang = async (req, res) => {
   if (
     !kodeBarang ||
     !namaBarang ||
-    !qty ||
+    
     !hargaBarang ||
     !kondisi ||
     !perolehan
   ) {
     return res
       .status(400)
-      .json({ message: "Kode, nama, qty, dan harga diperlukan" });
+      .json({ message: "Semua data harus diisi , coba lagi" });
   }
 
   const existingBarang = await prisma.barang.findFirst({
@@ -140,7 +140,7 @@ export const handlePostBarang = async (req, res) => {
         merkType,
         ukuran,
         jenis,
-        qty: parseInt(qty),
+        qty: 0,
         tahun: new Date().getFullYear(),
         hargaBarang: parseInt(hargaBarang),
         kondisi,
@@ -209,7 +209,7 @@ export const handleEditBarang = async (req, res) => {
   } = req.body;
 
   const { id } = req.params;
-  console.log(req.body);
+  
 
   if (!id) {
     return res.status(400).json({ message: "id harus diisi" });
