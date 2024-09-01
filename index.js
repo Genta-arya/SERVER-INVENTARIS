@@ -7,6 +7,7 @@ import BarangRouter from "./src/router/Barang/BarangRoutes.js";
 import RuanganRouter from "./src/router/Ruangan/RuanganRoutes.js";
 import PermintaanRouter from "./src/router/Permintaan/PermintaanRoutes.js";
 import InventarisRouter from "./src/router/Inventaris/InventarisRoutes.js";
+import ReportRouter from "./src/router/Report/ReportRouter.js";
 const app = express();
 const port = 5001;
 const httpServer = createServer(app);
@@ -23,6 +24,7 @@ app.use("/api/v1",BarangRouter)
 app.use("/api/v1",RuanganRouter)
 app.use("/api/v1",PermintaanRouter)
 app.use("/api/v1",InventarisRouter)
+app.use("/api/v1",ReportRouter)
 app.use("/image", express.static(path.resolve("public", "image")));
 
 

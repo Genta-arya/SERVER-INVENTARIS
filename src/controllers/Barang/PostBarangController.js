@@ -99,7 +99,6 @@ export const handlePostBarang = async (req, res) => {
     hargaBarang,
     kondisi,
     perolehan,
-    ruanganId,
   } = req.body;
 
   if (
@@ -113,6 +112,20 @@ export const handlePostBarang = async (req, res) => {
     return res
       .status(400)
       .json({ message: "Kode, nama, qty, dan harga diperlukan" });
+  }
+
+  const existingBarang = await prisma.barang.findFirst({
+    where: {
+      namaBarang: {
+        equals: namaBarang.toLowerCase(),
+      },
+    },
+  });
+
+  if (existingBarang) {
+    return res
+      .status(400)
+      .json({ message: "Nama barang sudah ada. Harap gunakan nama lain." });
   }
 
   let newBarang;
@@ -183,7 +196,6 @@ export const handlePostBarang = async (req, res) => {
 
 export const handleEditBarang = async (req, res) => {
   const {
-
     kodeBarang,
     namaBarang,
     nomorRegister,
@@ -196,12 +208,12 @@ export const handleEditBarang = async (req, res) => {
     perolehan,
   } = req.body;
 
-  const {id} = req.params
-  console.log(id)
+  const { id } = req.params;
+  console.log(req.body);
 
-   if (!id) {
-     return res.status(400).json({ message: "id harus diisi" });
-   }
+  if (!id) {
+    return res.status(400).json({ message: "id harus diisi" });
+  }
 
   if (
     !kodeBarang ||
@@ -226,23 +238,40 @@ export const handleEditBarang = async (req, res) => {
     });
     if (!findItem) {
       return res.status(404).json({ message: "Barang tidak ditemukan" });
-    } else {
-      await prisma.barang.update({
-        where: { id: id },
-        data: {
-          kodeBarang,
-          namaBarang,
-          nomorRegister,
-          merkType,
-          ukuran,
-          qty: parseInt(qty),
-          jenis,
-          hargaBarang: parseInt(hargaBarang),
-          kondisi,
-          perolehan,
-        },
+    }
+
+    const existingBarang = await prisma.barang.findFirst({
+      where: {
+        namaBarang : {
+          equals: namaBarang.toLowerCase(),
+        }
+      },
+    });
+    
+    console.log(id);
+    if ( existingBarang.id !== id) {
+      return res.status(400).json({
+        message: "Nama barang sudah ada. Harap gunakan nama lain.",
       });
     }
+
+    console.log("test",existingBarang);
+
+    await prisma.barang.update({
+      where: { id: id },
+      data: {
+        kodeBarang,
+        namaBarang,
+        nomorRegister,
+        merkType,
+        ukuran,
+        qty: parseInt(qty),
+        jenis,
+        hargaBarang: parseInt(hargaBarang),
+        kondisi,
+        perolehan,
+      },
+    });
 
     res.status(200).json({ message: "Barang Berhasil diupdate" });
   } catch (error) {
