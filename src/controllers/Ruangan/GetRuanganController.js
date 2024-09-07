@@ -27,7 +27,7 @@ export const GetSingleRuangan = async (req, res) => {
         },
         permintaan: {
           where: {
-            status: true,  // Menyaring hanya permintaan yang disetujui
+            status: true,  
           },
           include: {
             barang: {
@@ -44,7 +44,7 @@ export const GetSingleRuangan = async (req, res) => {
       return res.status(404).json({ message: "Ruangan tidak ditemukan" });
     }
 
-    // Kelompokkan permintaan berdasarkan barang, bulan, dan ruanganId
+   
     const permintaanGroupedByMonth = findOneRuangan.permintaan.reduce((acc, permintaan) => {
       const barangId = permintaan.barang.id;
       const month = new Date(permintaan.createdAt).toISOString().slice(0, 7); // Format YYYY-MM
@@ -55,8 +55,8 @@ export const GetSingleRuangan = async (req, res) => {
 
       if (!acc[barangId][month]) {
         acc[barangId][month] = {
-          id: permintaan.id, // Menyimpan ID permintaan pertama
-          qty: 0, // Mengakumulasi qty
+          id: permintaan.id, 
+          qty: 0, 
           status: permintaan.status,
           barangId: permintaan.barangId,
           ruanganId: permintaan.ruanganId,
@@ -66,13 +66,13 @@ export const GetSingleRuangan = async (req, res) => {
         };
       }
 
-      // Tambahkan qty dari permintaan
+    
       acc[barangId][month].qty += permintaan.qty;
 
       return acc;
     }, {});
 
-    // Format hasil agar lebih mudah dibaca
+   
     const formattedPermintaan = Object.keys(permintaanGroupedByMonth).map(barangId => {
       return {
         barangId,

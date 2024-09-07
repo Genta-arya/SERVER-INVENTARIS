@@ -84,6 +84,7 @@ model Ruangan {
 model Permintaan {
   id        Int      @id @default(autoincrement())
   qty       Int
+  nama String @default("")
   status    Boolean?
   barangId  String
   barang    Barang   @relation(fields: [barangId], references: [id])
@@ -91,6 +92,14 @@ model Permintaan {
   ruangan   Ruangan  @relation(fields: [ruanganId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Usulan {
+  id         Int      @id @default(autoincrement())
+  status     String?
+  namaBarang String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Inventaris {

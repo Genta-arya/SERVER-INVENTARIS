@@ -199,3 +199,25 @@ export const handleLogout = async (req, res) => {
     handleError(res, error);
   }
 };
+
+export const handleDeleteUser = async (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({ message: "id not found" });
+  }
+  try {
+    const deleteUser = await prisma.user.delete({
+      where: {
+        id: parseInt(id) || id,
+      },
+    });
+    if (!deleteUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res
+      .status(200)
+      .json({ message: "User deleted successfully", data: deleteUser });
+  } catch (error) {
+    handleError(res, error);
+  }
+};

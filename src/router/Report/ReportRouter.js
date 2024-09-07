@@ -1,8 +1,9 @@
 import express from "express";
-import { getReportTahunan } from "../../controllers/Report/GetReportController.js";
+import { GetReportKIR, getReportTahunan } from "../../controllers/Report/GetReportController.js";
 
 
 const ReportRouter = express.Router();
 
 ReportRouter.post("/report/inventaris",getReportTahunan)
+ReportRouter.get("/report/kir/:id",GetReportKIR)
 export default ReportRouter

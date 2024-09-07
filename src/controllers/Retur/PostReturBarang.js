@@ -1,59 +1,141 @@
 import prisma from "../../../prisma/Config.js";
 import { handleError } from "../../utils/errorHandler.js";
-
 export const PostReturBarang = async (req, res) => {
-    const { barangId } = req.body; // Menggunakan barangId alih-alih inventarisId
+  const { barangId, ruangId } = req.body;
 
-    console.log(barangId);
+  console.log("Received barangId:", barangId);
+  console.log("Received ruangId:", ruangId);
 
-    if (!barangId) {
-        return res.status(400).json({ message: "Barang ID diperlukan" });
+  if (!barangId) {
+    console.log("Error: Barang ID diperlukan");
+    return res.status(400).json({ message: "Barang ID diperlukan" });
+  }
+
+  try {
+    // Cari inventaris berdasarkan barangId
+    const inventarisList = await prisma.inventaris.findMany({
+      where: { ruanganId: parseInt(ruangId) , barangId:barangId},
+      include: {
+        barang: true,
+      },
+    });
+
+    console.log("Inventaris List:", inventarisList);
+
+    if (inventarisList.length === 0) {
+      console.log("Error: Inventaris tidak ditemukan");
+      return res.status(404).json({ message: "Inventaris tidak ditemukan" });
     }
 
-    try {
-        // Cari inventaris berdasarkan barangId
-        const inventarisList = await prisma.inventaris.findMany({
-            where: { barangId: barangId },
-            include: {
-                barang: true,  
-            },
-        });
+    // Mengambil inventaris pertama dari list
+    const inventaris = inventarisList.find(item => item.barangId=== barangId);
+    console.log("Selected Inventaris:", inventaris);
 
-        if (inventarisList.length === 0) {
-            return res.status(404).json({ message: "Inventaris tidak ditemukan" });
-        }
+    // Update stok barang di master
+    const updatedBarang = await prisma.barang.update({
+      where: { id: barangId  },
+      data: {
+        qty: inventaris.barang.qty + inventaris.qty, // Tambah qty ke stok barang
+      },
+    });
 
-        // Mengambil inventaris pertama dari list
-        const inventaris = inventarisList[0];
+    console.log("Updated Barang:", updatedBarang);
 
-        // Update stok barang di master
-        const updatedBarang = await prisma.barang.update({
-            where: { id: inventaris.barangId },
-            data: {
-                qty: inventaris.barang.qty + inventaris.qty, // Tambah qty ke stok barang
-            },
-        });
+    // Hapus data dari tabel BarangKeluar berdasarkan barangId
+    const deletedBarangKeluar = await prisma.barangKeluar.deleteMany({
+      where: { barangId: barangId, ruanganId: parseInt(ruangId) },
+    });
 
-        // Hapus data dari tabel BarangKeluar berdasarkan barangId
-        await prisma.barangKeluar.deleteMany({
-            where: { barangId: inventaris.barangId },
-        });
+    console.log("Deleted BarangKeluar:", deletedBarangKeluar);
 
-        // Hapus data permintaan terkait
-        await prisma.permintaan.deleteMany({
-            where: { barangId: inventaris.barangId },
-        });
+    // Hapus data permintaan terkait
+    const deletedPermintaan = await prisma.permintaan.deleteMany({
+      where: { ruanganId: parseInt(ruangId), barangId: barangId }, // Menggunakan parseInt() untuk mengkonversi ruangId },
+    });
 
-        // Hapus semua inventaris terkait barangId
-        await prisma.inventaris.deleteMany({
-            where: { barangId: barangId },
-        });
+    console.log("Deleted Permintaan:", deletedPermintaan);
 
-        return res.status(200).json({
-            message: "Barang berhasil di-retur",
-            updatedBarang,
-        });
-    } catch (error) {
-        handleError(res, error);
-    }
+    // Hapus semua inventaris terkait barangId
+    const deletedInventaris = await prisma.inventaris.deleteMany({
+      where: { ruanganId: parseInt(ruangId), barangId: barangId },
+    });
+
+    console.log("Deleted Inventaris:", deletedInventaris);
+
+    return res.status(200).json({
+      message: "Barang berhasil di-retur",
+      updatedBarang,
+    });
+  } catch (error) {
+    console.error("Error occurred:", error);
+    handleError(res, error);
+  }
 };
+
+// export const PostReturBarang = async (req, res) => {
+//     const { barangId, ruangId } = req.body;
+
+//     console.log("Received ruangId:", ruangId); // Log ruangId yang diterima dari request
+//     console.log("Received barangId:", barangId); // Log barangId yang diterima dari request
+
+//     if (!barangId) {
+//         console.log("Error: Barang ID diperlukan");
+//         return res.status(400).json({ message: "Barang ID diperlukan" });
+//     }
+
+//     try {
+//         // Cari inventaris berdasarkan barangId dan ruangId
+//         const inventarisList = await prisma.inventaris.findMany({
+//             where: {
+//                 barangId: barangId,
+//                 ruanganId: parseInt(ruangId), // Menggunakan parseInt() untuk mengkonversi ruangId // Menambahkan filter untuk ruangId
+//             },
+//             include: {
+//                 barang: true,
+//             },
+//         });
+
+//         console.log("Inventaris List:", inventarisList); // Log hasil pencarian inventaris
+
+//         if (inventarisList.length === 0) {
+//             console.log("Error: Inventaris tidak ditemukan untuk barangId dan ruangId yang diberikan");
+//             return res.status(404).json({ message: "Inventaris tidak ditemukan" });
+//         }
+
+//         // Mengambil inventaris pertama dari list
+//         const inventaris = inventarisList[0];
+//         console.log("Selected Inventaris:", inventaris); // Log inventaris yang dipilih
+
+//         // Log barang yang akan diperbarui
+//         console.log("Barang to be updated:", {
+//             where: { id: inventaris.barangId },
+//             data: {
+//                 qty: inventaris.barang.qty + inventaris.qty, // Tambah qty ke stok barang
+//             },
+//         });
+
+//         // Log penghapusan data dari tabel BarangKeluar
+//         console.log("BarangKeluar delete criteria:", {
+//             where: { barangId: inventaris.barangId },
+//         });
+
+//         // Log penghapusan data permintaan
+//         console.log("Permintaan delete criteria:", {
+//             where: { barangId: inventaris.barangId },
+//         });
+
+//         // Log penghapusan inventaris
+//         console.log("Inventaris delete criteria:", {
+//             where: { barangId: barangId, ruangId: ruangId },
+//         });
+
+//         // Hanya mengembalikan respons tanpa melakukan update atau penghapusan
+//         return res.status(200).json({
+//             message: "Data berhasil diproses untuk di-retur",
+//             inventaris,
+//         });
+//     } catch (error) {
+//         console.error("Error occurred:", error); // Log error jika terjadi kesalahan
+//         handleError(res, error);
+//     }
+// };
