@@ -42,28 +42,33 @@ export const DeleteRuangan = async (req, res) => {
             });
         }
 
-        // 3. Hapus permintaan yang terkait dengan ruangan ini
-        const deletedPermintaan = await prisma.permintaan.deleteMany({
-            where: { ruanganId: parseInt(id) },
-        });
-
-        console.log('Permintaan yang dihapus:', deletedPermintaan);
-
-        // 4. Hapus inventaris yang terkait dengan ruangan ini
+        // 3. Hapus inventaris yang terkait dengan ruangan ini
         const deletedInventaris = await prisma.inventaris.deleteMany({
             where: { ruanganId: parseInt(id) },
         });
 
         console.log('Inventaris yang dihapus:', deletedInventaris);
 
-        // 5. Hapus barang yang terkait dengan ruangan ini
-        const deletedBarang = await prisma.barang.deleteMany({
+        // 4. Hapus permintaan yang terkait dengan ruangan ini
+        const deletedPermintaan = await prisma.permintaan.deleteMany({
+            where: { ruanganId: parseInt(id) },
+        });
+
+        console.log('Permintaan yang dihapus:', deletedPermintaan);
+
+        // 5. Hapus barang keluar yang terkait dengan ruangan ini
+        const deletedBarangKeluar = await prisma.barangKeluar.deleteMany({
+            where: { ruanganId: parseInt(id) },
+        });
+
+        console.log('Barang keluar yang dihapus:', deletedBarangKeluar);
+
+        // 6. Hapus barang yang terkait dengan ruangan ini (jika ada)
+        await prisma.barang.deleteMany({
             where: { inventaris: { some: { ruanganId: parseInt(id) } } },
         });
 
-        console.log('Barang yang dihapus:', deletedBarang);
-
-        // 6. Hapus ruangan
+        // 7. Hapus ruangan
         const deleteRuangan = await prisma.ruangan.delete({
             where: { id: parseInt(id) },
         });

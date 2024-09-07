@@ -44,11 +44,10 @@ model Barang {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   barangKeluar  BarangKeluar[]
-  barangMasuk BarangMasuk[]
+  barangMasuk   BarangMasuk[]
   permintaan    Permintaan[]
   inventaris    Inventaris[]
 }
-
 
 model BarangMasuk {
   id         Int      @id @default(autoincrement())
@@ -59,36 +58,28 @@ model BarangMasuk {
   barang     Barang   @relation(fields: [barangId], references: [id])
 }
 
-
 model BarangKeluar {
   id         Int      @id @default(autoincrement())
   barangId   String
   qty        Int
   tanggal    DateTime @default(now())
   keterangan String?
-  ruanganId  Int     
+  ruanganId  Int
 
-  barang     Barang   @relation(fields: [barangId], references: [id])
-  ruangan    Ruangan  @relation(fields: [ruanganId], references: [id]) // Menambahkan relasi dengan Ruangan
+  barang  Barang  @relation(fields: [barangId], references: [id])
+  ruangan Ruangan @relation(fields: [ruanganId], references: [id]) // Menambahkan relasi dengan Ruangan
 }
-
-
-
-
 
 model Ruangan {
-  id          Int             @id @default(autoincrement())
-  nama        String
-
-  permintaan  Permintaan[]
-  inventaris  Inventaris[]
+  id           Int            @id @default(autoincrement())
+  nama         String
+  kodeRuang    String
+  permintaan   Permintaan[]
+  inventaris   Inventaris[]
   barangKeluar BarangKeluar[] // Menambahkan relasi dengan BarangKeluar
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 }
-
-
-
 
 model Permintaan {
   id        Int      @id @default(autoincrement())
@@ -101,8 +92,6 @@ model Permintaan {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
-
 
 model Inventaris {
   id        Int      @id @default(autoincrement())
