@@ -94,21 +94,14 @@ export const handlePostBarang = async (req, res) => {
     nomorRegister,
     merkType,
     ukuran,
-   
+
     jenis,
     hargaBarang,
     kondisi,
     perolehan,
   } = req.body;
 
-  if (
-    !kodeBarang ||
-    !namaBarang ||
-    
-    !hargaBarang ||
-    !kondisi ||
-    !perolehan
-  ) {
+  if (!kodeBarang || !namaBarang || !hargaBarang || !kondisi || !perolehan) {
     return res
       .status(400)
       .json({ message: "Semua data harus diisi , coba lagi" });
@@ -201,7 +194,7 @@ export const handleEditBarang = async (req, res) => {
     nomorRegister,
     merkType,
     ukuran,
-    qty,
+
     jenis,
     hargaBarang,
     kondisi,
@@ -209,7 +202,6 @@ export const handleEditBarang = async (req, res) => {
   } = req.body;
 
   const { id } = req.params;
-  
 
   if (!id) {
     return res.status(400).json({ message: "id harus diisi" });
@@ -218,7 +210,6 @@ export const handleEditBarang = async (req, res) => {
   if (
     !kodeBarang ||
     !namaBarang ||
-    !qty ||
     !jenis ||
     !nomorRegister ||
     !merkType ||
@@ -242,20 +233,20 @@ export const handleEditBarang = async (req, res) => {
 
     const existingBarang = await prisma.barang.findFirst({
       where: {
-        namaBarang : {
+        namaBarang: {
           equals: namaBarang.toLowerCase(),
-        }
+        },
       },
     });
-    
+
     console.log(id);
-    if ( existingBarang.id !== id) {
+    if (existingBarang.id !== id) {
       return res.status(400).json({
         message: "Nama barang sudah ada. Harap gunakan nama lain.",
       });
     }
 
-    console.log("test",existingBarang);
+    console.log("test", existingBarang);
 
     await prisma.barang.update({
       where: { id: id },
@@ -265,7 +256,7 @@ export const handleEditBarang = async (req, res) => {
         nomorRegister,
         merkType,
         ukuran,
-        qty: parseInt(qty),
+
         jenis,
         hargaBarang: parseInt(hargaBarang),
         kondisi,
@@ -278,5 +269,3 @@ export const handleEditBarang = async (req, res) => {
     handleError(res, error);
   }
 };
-
-

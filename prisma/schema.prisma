@@ -48,6 +48,7 @@ model Barang {
   barangKeluar  BarangKeluar[]
   barangMasuk   BarangMasuk[]
   permintaan    Permintaan[]
+  peminjaman    Peminjaman[]
   inventaris    Inventaris[]
 }
 
@@ -66,10 +67,11 @@ model BarangKeluar {
   qty        Int
   tanggal    DateTime @default(now())
   keterangan String?
-  ruanganId  Int
+  ruanganId  Int?
+  
 
   barang  Barang  @relation(fields: [barangId], references: [id])
-  ruangan Ruangan @relation(fields: [ruanganId], references: [id]) // Menambahkan relasi dengan Ruangan
+  ruangan Ruangan? @relation(fields: [ruanganId], references: [id]) // Menambahkan relasi dengan Ruangan
 }
 
 model Ruangan {
@@ -115,4 +117,16 @@ model Inventaris {
   updatedAt DateTime @updatedAt
 
   @@unique([barangId, ruanganId])
+}
+
+model Peminjaman {
+  id             Int      @id @default(autoincrement())
+  qty            Int
+  nama           String   @default("")
+  status         String
+  status_kembali String?
+  barangId       String
+  barang         Barang   @relation(fields: [barangId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }

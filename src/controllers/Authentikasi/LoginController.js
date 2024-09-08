@@ -174,6 +174,7 @@ export const getUser = async (req, res) => {
 
 export const handleLogout = async (req, res) => {
   const { token } = req.body;
+  console.log(token);
   if (!token) {
     return res.status(400).json({ message: "not login" });
   }

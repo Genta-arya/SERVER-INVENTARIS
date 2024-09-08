@@ -3,9 +3,7 @@ import { handleError } from "../../utils/errorHandler.js";
 
 export const GetBarang = async (req, res) => {
   try {
-    const findAllBarang = await prisma.barang.findMany({
-    
-    });
+    const findAllBarang = await prisma.barang.findMany({});
 
     res.status(200).json({ data: findAllBarang });
   } catch (error) {
@@ -25,6 +23,25 @@ export const GetSingleBarang = async (req, res) => {
     });
 
     res.status(200).json({ data: findOneBarang });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const PrintQrCode = async (req, res) => {
+  try {
+    const findAllBarang = await prisma.barang.findMany({
+      where: {
+        jenis: "Asset",
+      },
+      select: {
+        id: true,
+        namaBarang: true,
+        imageBarcode: true,
+      },
+    });
+
+    res.status(200).json({ data: findAllBarang });
   } catch (error) {
     handleError(res, error);
   }

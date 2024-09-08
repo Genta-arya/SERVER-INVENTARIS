@@ -94,6 +94,10 @@ export const DeleteBarang = async (req, res) => {
             where: { barangId: id }
         });
 
+        await prisma.peminjaman.deleteMany({
+            where: { barangId: id }
+        });
+
         // 3. Hapus barang dari database
         await prisma.barang.delete({
             where: { id: id }

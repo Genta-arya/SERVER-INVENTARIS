@@ -22,8 +22,8 @@ export const RekapData = async (req, res) => {
     const totalBarang = await prisma.barang.count();
 
     const totalUsulan = await prisma.usulan.count();
-
-   
+    const totalRuangan = await prisma.ruangan.count();
+    const totalPinjaman = await prisma.peminjaman.count();
 
     res.status(200).json({
       data: {
@@ -31,7 +31,9 @@ export const RekapData = async (req, res) => {
         totalInventaris,
         totalUsulan,
         totalPermintaan,
+        totalRuangan,
         totalBarang,
+        totalPinjaman,
         totalBarangKeluar,
         totalBarangMasuk,
       },

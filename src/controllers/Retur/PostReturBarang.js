@@ -1,20 +1,98 @@
 import prisma from "../../../prisma/Config.js";
 import { handleError } from "../../utils/errorHandler.js";
+// export const PostReturBarang = async (req, res) => {
+//   const { barangId, ruangId , qty } = req.body;
+
+//   console.log("Received barangId:", barangId);
+//   console.log("Received ruangId:", ruangId);
+
+//   if (!barangId) {
+//     console.log("Error: Barang ID diperlukan");
+//     return res.status(400).json({ message: "Barang ID diperlukan" });
+//   }
+
+//   try {
+//     // Cari inventaris berdasarkan barangId
+//     const inventarisList = await prisma.inventaris.findMany({
+//       where: { ruanganId: parseInt(ruangId) , barangId:barangId},
+//       include: {
+//         barang: true,
+//       },
+//     });
+
+//     console.log("Inventaris List:", inventarisList);
+
+//     if (inventarisList.length === 0) {
+//       console.log("Error: Inventaris tidak ditemukan");
+//       return res.status(404).json({ message: "Inventaris tidak ditemukan" });
+//     }
+
+//     // Mengambil inventaris pertama dari list
+//     const inventaris = inventarisList.find(item => item.barangId=== barangId);
+//     console.log("Selected Inventaris:", inventaris);
+
+//     // Update stok barang di master
+//     const updatedBarang = await prisma.barang.update({
+//       where: { id: barangId  },
+//       data: {
+//         qty: inventaris.barang.qty + inventaris.qty, // Tambah qty ke stok barang
+//       },
+//     });
+
+//     console.log("Updated Barang:", updatedBarang);
+
+//     // Hapus data dari tabel BarangKeluar berdasarkan barangId
+//     const deletedBarangKeluar = await prisma.barangKeluar.deleteMany({
+//       where: { barangId: barangId, ruanganId: parseInt(ruangId) },
+//     });
+
+//     console.log("Deleted BarangKeluar:", deletedBarangKeluar);
+
+//     // Hapus data permintaan terkait
+//     const deletedPermintaan = await prisma.permintaan.deleteMany({
+//       where: { ruanganId: parseInt(ruangId), barangId: barangId }, // Menggunakan parseInt() untuk mengkonversi ruangId },
+//     });
+
+//     console.log("Deleted Permintaan:", deletedPermintaan);
+
+//     // Hapus semua inventaris terkait barangId
+//     const deletedInventaris = await prisma.inventaris.deleteMany({
+//       where: { ruanganId: parseInt(ruangId), barangId: barangId },
+//     });
+
+//     console.log("Deleted Inventaris:", deletedInventaris);
+
+//     return res.status(200).json({
+//       message: "Barang berhasil di-retur",
+//       updatedBarang,
+//     });
+//   } catch (error) {
+//     console.error("Error occurred:", error);
+//     handleError(res, error);
+//   }
+// };
+
 export const PostReturBarang = async (req, res) => {
-  const { barangId, ruangId } = req.body;
+  const { barangId, ruangId, qty } = req.body;
 
   console.log("Received barangId:", barangId);
   console.log("Received ruangId:", ruangId);
+  console.log("Received qty:", qty);
 
   if (!barangId) {
     console.log("Error: Barang ID diperlukan");
     return res.status(400).json({ message: "Barang ID diperlukan" });
   }
 
+  if (!qty || qty <= 0) {
+    console.log("Error: Quantity yang valid diperlukan");
+    return res.status(400).json({ message: "Quantity yang valid diperlukan" });
+  }
+
   try {
-    // Cari inventaris berdasarkan barangId
+    // Cari inventaris berdasarkan barangId dan ruangId
     const inventarisList = await prisma.inventaris.findMany({
-      where: { ruanganId: parseInt(ruangId) , barangId:barangId},
+      where: { ruanganId: parseInt(ruangId), barangId: barangId },
       include: {
         barang: true,
       },
@@ -28,39 +106,63 @@ export const PostReturBarang = async (req, res) => {
     }
 
     // Mengambil inventaris pertama dari list
-    const inventaris = inventarisList.find(item => item.barangId=== barangId);
+    const inventaris = inventarisList.find(
+      (item) => item.barangId === barangId
+    );
     console.log("Selected Inventaris:", inventaris);
 
-    // Update stok barang di master
+    // Update stok barang di master dengan qty dari input user
     const updatedBarang = await prisma.barang.update({
-      where: { id: barangId  },
+      where: { id: barangId },
       data: {
-        qty: inventaris.barang.qty + inventaris.qty, // Tambah qty ke stok barang
+        qty: inventaris.barang.qty + parseInt(qty), // Tambah qty input ke stok barang
       },
+    });
+
+    await prisma.inventaris.updateMany({
+      where: { ruanganId: parseInt(ruangId), barangId: barangId },
+      data: {
+        qty: inventaris.qty - parseInt(qty),
+      },
+    });
+
+    // jika barang inventaris sudah 0 maka delete
+    await prisma.inventaris.deleteMany({
+      where: { ruanganId: parseInt(ruangId), barangId: barangId, qty: 0 },
+    });
+
+    // jika permintaan 0 maka delete
+    await prisma.permintaan.updateMany({
+      where: { ruanganId: parseInt(ruangId), barangId: barangId },
+      data: {
+        qty: inventaris.qty - parseInt(qty),
+      },
+    });
+
+    await prisma.permintaan.deleteMany({
+      where: { ruanganId: parseInt(ruangId), barangId: barangId, qty: 0 },
     });
 
     console.log("Updated Barang:", updatedBarang);
 
-    // Hapus data dari tabel BarangKeluar berdasarkan barangId
-    const deletedBarangKeluar = await prisma.barangKeluar.deleteMany({
+    // Mengurangi qty di barangKeluar berdasarkan qty yang di-retur
+    const updatedBarangKeluar = await prisma.barangKeluar.updateMany({
       where: { barangId: barangId, ruanganId: parseInt(ruangId) },
+      data: {
+        qty: {
+          decrement: parseInt(qty), // Kurangi qty barang keluar sesuai dengan retur
+        },
+      },
     });
 
-    console.log("Deleted BarangKeluar:", deletedBarangKeluar);
+    console.log("Updated BarangKeluar:", updatedBarangKeluar);
 
-    // Hapus data permintaan terkait
-    const deletedPermintaan = await prisma.permintaan.deleteMany({
-      where: { ruanganId: parseInt(ruangId), barangId: barangId }, // Menggunakan parseInt() untuk mengkonversi ruangId },
+    // Jika qty di barangKeluar sudah habis, hapus entri tersebut
+    await prisma.barangKeluar.deleteMany({
+      where: { barangId: barangId, ruanganId: parseInt(ruangId), qty: 0 },
     });
 
-    console.log("Deleted Permintaan:", deletedPermintaan);
-
-    // Hapus semua inventaris terkait barangId
-    const deletedInventaris = await prisma.inventaris.deleteMany({
-      where: { ruanganId: parseInt(ruangId), barangId: barangId },
-    });
-
-    console.log("Deleted Inventaris:", deletedInventaris);
+    console.log("Deleted BarangKeluar jika qty habis");
 
     return res.status(200).json({
       message: "Barang berhasil di-retur",
