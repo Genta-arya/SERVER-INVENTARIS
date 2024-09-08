@@ -18,6 +18,7 @@ model User {
   username  String   @unique
   name      String?
   password  String
+  avatar    String?
   email     String?
   otp       String?
   token     String?
