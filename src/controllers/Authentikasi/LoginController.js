@@ -1,7 +1,9 @@
+import { getDownloadURL, uploadBytes } from "firebase/storage";
 import { handleError } from "../../utils/errorHandler.js";
 import prisma from "./../../../prisma/Config.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { storage } from "../../Config/Firebase.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 export const handleLogin = async (req, res) => {
@@ -218,6 +220,60 @@ export const handleDeleteUser = async (req, res) => {
       .status(200)
       .json({ message: "User deleted successfully", data: deleteUser });
   } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const updateAvatarProfil = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (req.file && req.file.buffer) {
+      const imageBuffer = req.file.buffer;
+      console.log(req.file);
+
+      const storageRef = ref(storage, `avatars/${req.file.originalname}`);
+      const snapshot = await uploadBytes(storageRef, imageBuffer);
+      const fotoURL = await getDownloadURL(snapshot.ref);
+
+      const updatedUser = await prisma.user.update({
+        where: { id: parseInt(id) },
+        data: { avatar: fotoURL },
+      });
+
+      return res.status(200).json({
+        message: "Avatar profil berhasil diperbarui",
+        user: updatedUser,
+      });
+    } else {
+      return res.status(400).json({
+        message: "File gambar tidak ditemukan",
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Terjadi kesalahan saat memperbarui avatar profil",
+      error: error.message,
+    });
+  }
+};
+
+export const updateDataNameUser = async (req, res) => {
+  const { id } = req.params;
+  const { name } = req.body;
+
+  try {
+    const updatedUser = await prisma.user.update({
+      where: { id: parseInt(id) },
+      data: { name: name },
+    });
+    return res.status(200).json({
+      message: "Data name user berhasil diperbarui",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error(error);
     handleError(res, error);
   }
 };
