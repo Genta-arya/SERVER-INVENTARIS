@@ -9,6 +9,8 @@ import PermintaanRouter from "./src/router/Permintaan/PermintaanRoutes.js";
 import InventarisRouter from "./src/router/Inventaris/InventarisRoutes.js";
 import ReportRouter from "./src/router/Report/ReportRouter.js";
 import UsulanRouter from "./src/router/Usulan/UsulanRoutes.js";
+import DashboardRouter from "./src/router/Dashboard/DashboardRoute.js";
+
 const app = express();
 const port = 5001;
 const httpServer = createServer(app);
@@ -20,15 +22,15 @@ app.use(
   })
 );
 
-app.use("/api/v1",AuthRouter)
-app.use("/api/v1",BarangRouter)
-app.use("/api/v1",RuanganRouter)
-app.use("/api/v1",PermintaanRouter)
-app.use("/api/v1",InventarisRouter)
-app.use("/api/v1",UsulanRouter)
-app.use("/api/v1",ReportRouter)
+app.use("/api/v1", AuthRouter);
+app.use("/api/v1", BarangRouter);
+app.use("/api/v1", RuanganRouter);
+app.use("/api/v1", PermintaanRouter);
+app.use("/api/v1", InventarisRouter);
+app.use("/api/v1", UsulanRouter);
+app.use("/api/v1", ReportRouter);
+app.use("/api/v1", DashboardRouter);
 app.use("/image", express.static(path.resolve("public", "image")));
-
 
 httpServer.listen(port, () => {
   console.log("Server running on port " + port);

@@ -94,7 +94,7 @@ export const handlePostBarang = async (req, res) => {
     nomorRegister,
     merkType,
     ukuran,
-  
+   
     jenis,
     hargaBarang,
     kondisi,
@@ -278,3 +278,5 @@ export const handleEditBarang = async (req, res) => {
     handleError(res, error);
   }
 };
+
+
