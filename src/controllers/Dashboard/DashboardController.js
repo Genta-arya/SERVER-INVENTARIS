@@ -19,16 +19,21 @@ export const RekapData = async (req, res) => {
 
     const totalPermintaan = await prisma.permintaan.count();
 
+    const totalBarang = await prisma.barang.count();
+
     const totalUsulan = await prisma.usulan.count();
+
+   
 
     res.status(200).json({
       data: {
         totalUser,
         totalInventaris,
+        totalUsulan,
+        totalPermintaan,
+        totalBarang,
         totalBarangKeluar,
         totalBarangMasuk,
-        totalPermintaan,
-        totalUsulan,
       },
     });
   } catch (error) {

@@ -16,6 +16,7 @@ datasource db {
 model User {
   id        Int      @id @default(autoincrement())
   username  String   @unique
+  name      String?
   password  String
   email     String?
   otp       String?
@@ -84,7 +85,7 @@ model Ruangan {
 model Permintaan {
   id        Int      @id @default(autoincrement())
   qty       Int
-  nama String @default("")
+  nama      String   @default("")
   status    Boolean?
   barangId  String
   barang    Barang   @relation(fields: [barangId], references: [id])
