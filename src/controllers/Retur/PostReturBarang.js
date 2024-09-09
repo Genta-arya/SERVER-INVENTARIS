@@ -159,7 +159,12 @@ export const PostReturBarang = async (req, res) => {
 
     // Jika qty di barangKeluar sudah habis, hapus entri tersebut
     await prisma.barangKeluar.deleteMany({
-      where: { barangId: barangId, ruanganId: parseInt(ruangId), qty: 0 },
+      where: {
+        barangId: barangId,
+        ruanganId: parseInt(ruangId),
+        qty: 0,
+        keterangan: "Permintaan barang",
+      },
     });
 
     console.log("Deleted BarangKeluar jika qty habis");
