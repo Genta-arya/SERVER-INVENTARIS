@@ -6,6 +6,7 @@ import {
   handleLogin,
   handleLogout,
   handleRegister,
+  updateAvatarProfil,
   updateDataNameUser,
 } from "../../controllers/Authentikasi/LoginController.js";
 import { upload } from "../../Config/Firebase.js";
@@ -18,5 +19,5 @@ AuthRouter.post("/register", handleRegister);
 AuthRouter.post("/logout", handleLogout);
 AuthRouter.delete("/user/:id", handleDeleteUser);
 AuthRouter.put("/user/name/:id", updateDataNameUser);
-AuthRouter.post("/user/avatar/:id" ,upload.single("image"), checkLogin);
+AuthRouter.post("/user/avatar/:id", upload.single("image"), updateAvatarProfil);
 export default AuthRouter;

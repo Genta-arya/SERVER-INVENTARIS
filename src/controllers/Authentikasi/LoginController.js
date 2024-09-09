@@ -1,4 +1,4 @@
-import { getDownloadURL, uploadBytes } from "firebase/storage";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { handleError } from "../../utils/errorHandler.js";
 import prisma from "./../../../prisma/Config.js";
 import bcrypt from "bcryptjs";
@@ -29,7 +29,7 @@ export const handleLogin = async (req, res) => {
     });
 
     if (!findUser) {
-      return res.status(400).json({ message: "Invalid Credentials" });
+      return res.status(400).json({ message: "Username atau password salah" });
     }
 
     const isMatch = await bcrypt.compare(password, findUser.password);
@@ -136,6 +136,7 @@ export const checkLogin = async (req, res) => {
         username: true,
         token: true,
         status: true,
+        avatar: true,
         role: true,
       },
     });
