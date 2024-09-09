@@ -2,8 +2,10 @@ import prisma from "../../../prisma/Config.js";
 import { handleError } from "../../utils/errorHandler.js";
 
 export const PostUsul = async (req, res) => {
-  const { namaBarang } = req.body;
-  if (!namaBarang) {
+  const { data  } = req.body;
+ const { namaBarang , unit , nama } = data
+  console.log("Received data:", req.body);
+  if (!namaBarang || !unit || !nama) {
     return res
       .status(400)
       .json({ message: "Semua data harus diisi , coba lagi" });
@@ -12,6 +14,8 @@ export const PostUsul = async (req, res) => {
     const newUsul = await prisma.usulan.create({
       data: {
         namaBarang,
+        unit,
+        nama,
         status: "belum",
       },
     });
@@ -60,9 +64,9 @@ export const updateStatusUsulan = async (req, res) => {
 
 export const updateNamaBarang = async (req, res) => {
   const { id } = req.params;
-  const { namaBarang } = req.body;
-  if (!id) {
-    return res.status(400).json({ message: "Id is required" });
+  const { namaBarang   } = req.body;
+  if (!id ) {
+    return res.status(400).json({ message: "Lengkapi semua form" });
   }
   if (!namaBarang) {
     return res.status(400).json({ message: "Semua Form Harus diisi" });
@@ -74,6 +78,8 @@ export const updateNamaBarang = async (req, res) => {
       },
       data: {
         namaBarang,
+      
+
       },
     });
     return res.status(200).json({

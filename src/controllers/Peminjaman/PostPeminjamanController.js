@@ -151,12 +151,15 @@ export const updateStatusPeminjaman = async (req, res) => {
 export const ReturPeminjaman = async (req, res) => {
   const { data } = req.body;
   const { peminjamanId } = data;
+  // tanggal indonesia
+  const today = getIndonesianDate ();
+  console.log(today);
   if (!peminjamanId) {
     return res
       .status(400)
       .json({ message: "Peminjaman ID dan status harus diisi" });
   }
-
+ 
   try {
     const peminjaman = await prisma.peminjaman.update({
       where: {
@@ -164,6 +167,7 @@ export const ReturPeminjaman = async (req, res) => {
       },
       data: {
         status_kembali: "kembali",
+        updatedAt: today,
       },
     });
 

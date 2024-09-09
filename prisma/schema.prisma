@@ -68,9 +68,8 @@ model BarangKeluar {
   tanggal    DateTime @default(now())
   keterangan String?
   ruanganId  Int?
-  
 
-  barang  Barang  @relation(fields: [barangId], references: [id])
+  barang  Barang   @relation(fields: [barangId], references: [id])
   ruangan Ruangan? @relation(fields: [ruanganId], references: [id]) // Menambahkan relasi dengan Ruangan
 }
 
@@ -101,6 +100,8 @@ model Permintaan {
 model Usulan {
   id         Int      @id @default(autoincrement())
   status     String?
+  nama       String?
+  unit       String?
   namaBarang String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -120,13 +121,13 @@ model Inventaris {
 }
 
 model Peminjaman {
-  id             Int      @id @default(autoincrement())
+  id             Int       @id @default(autoincrement())
   qty            Int
-  nama           String   @default("")
+  nama           String    @default("")
   status         String
   status_kembali String?
   barangId       String
-  barang         Barang   @relation(fields: [barangId], references: [id])
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  barang         Barang    @relation(fields: [barangId], references: [id])
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime? @db.Timestamp(0)
 }
