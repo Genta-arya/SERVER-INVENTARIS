@@ -201,6 +201,7 @@ export const ReturPeminjaman = async (req, res) => {
       await prisma.barangKeluar.deleteMany({
         where: {
           qty: 0,
+          keterangan: "peminjaman",
         },
       });
     }
