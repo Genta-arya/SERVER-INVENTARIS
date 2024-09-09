@@ -27,7 +27,9 @@ export const GetSingleRuangan = async (req, res) => {
         },
         permintaan: {
           where: {
-            status: true,  
+            status: true,
+             
+             
           },
           include: {
             barang: {

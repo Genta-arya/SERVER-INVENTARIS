@@ -1,4 +1,5 @@
 import prisma from "../../../prisma/Config.js";
+import { handleError } from "../../utils/errorHandler.js";
 //  Report Tahunan Inventaris
 export const getReportTahunan = async (req, res) => {
   const { date } = req.body;
@@ -72,6 +73,99 @@ export const GetReportKIR = async (req, res) => {
     }
 
     res.status(200).json({ data: findOneRuangan });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const getReportBarangKeluar = async (req, res) => {
+  try {
+    // Dapatkan tahun saat ini atau tahun yang diinginkan dari query atau gunakan tahun saat ini
+    // const year = parseInt(req.query.year) || new Date().getFullYear();
+    const year = 2025;
+    const startOfYear = new Date(year, 0, 1); // 1 Januari
+    const endOfYear = new Date(year + 1, 0, 1); // 1 Januari tahun berikutnya
+
+    // Ambil semua barang keluar untuk tahun yang ditentukan
+    const barangKeluarData = await prisma.barangKeluar.findMany({
+      where: {
+        tanggal: {
+          gte: startOfYear,
+          lt: endOfYear,
+        },
+        barang: {
+          jenis: "Habis Pakai", // Filter berdasarkan jenis barang
+        },
+      },
+      select: {
+        barangId: true,
+        qty: true,
+        ruanganId: true,
+      },
+    });
+
+    // Hitung total qty untuk setiap barangId dan ruanganId
+    const totalQtyPerBarangPerRuangan = barangKeluarData.reduce((acc, item) => {
+      const key = `${item.barangId}-${item.ruanganId}`;
+      if (!acc[key]) {
+        acc[key] = {
+          totalQty: 0,
+          barangId: item.barangId,
+          ruanganId: item.ruanganId,
+        };
+      }
+      acc[key].totalQty += item.qty;
+      return acc;
+    }, {});
+
+    // Ambil data barang untuk menggabungkan nama barang
+    const barangIds = [
+      ...new Set(
+        Object.values(totalQtyPerBarangPerRuangan).map((item) => item.barangId)
+      ),
+    ];
+    const barangData = await prisma.barang.findMany({
+      where: {
+        id: { in: barangIds },
+      },
+      select: {
+        id: true,
+        namaBarang: true,
+        jenis: true,
+      },
+    });
+
+    // Ambil data ruangan untuk menggabungkan nama ruangan
+    const ruanganIds = [
+      ...new Set(
+        Object.values(totalQtyPerBarangPerRuangan).map((item) => item.ruanganId)
+      ),
+    ];
+    const ruanganData = await prisma.ruangan.findMany({
+      where: {
+        id: { in: ruanganIds },
+      },
+      select: {
+        id: true,
+        nama: true,
+      },
+    });
+
+    
+    const result = Object.values(totalQtyPerBarangPerRuangan).map((item) => {
+      const barang = barangData.find((b) => b.id === item.barangId);
+      const ruangan = ruanganData.find((r) => r.id === item.ruanganId);
+      return {
+        id: item.barangId,
+        namaBarang: barang?.namaBarang || "Nama Barang Tidak Tersedia",
+        jenis: barang?.jenis || "Jenis Tidak Tersedia",
+        namaRuangan: ruangan?.nama || "Nama Ruangan Tidak Tersedia",
+        totalQty: item.totalQty, // Total qty untuk barang per ruangan
+      };
+    });
+
+    // Mengirimkan hasil ke client
+    res.json({ data: result, tahun: year });
   } catch (error) {
     handleError(res, error);
   }

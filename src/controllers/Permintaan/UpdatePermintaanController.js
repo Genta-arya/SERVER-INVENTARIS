@@ -92,7 +92,7 @@ export const updatePermintaan = async (req, res) => {
           barangId: permintaan.barang.id,
           qty: data.qty,
           tanggal: new Date(),
-          keterangan: 'Permintaan barang',
+          keterangan: 'Permintaan barang Asset',
           ruanganId: data.ruanganId, // Sertakan ID ruangan tujuan
         },
       });
