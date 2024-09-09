@@ -37,6 +37,8 @@ export const PrintQrCode = async (req, res) => {
       select: {
         id: true,
         namaBarang: true,
+        kodeBarang: true,
+        tahun: true,
         imageBarcode: true,
       },
     });
