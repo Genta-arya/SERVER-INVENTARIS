@@ -190,6 +190,7 @@ export const ReturPeminjaman = async (req, res) => {
       await prisma.barangKeluar.updateMany({
         where: {
           barangId: peminjaman.barangId,
+          keterangan: "peminjaman",
         },
         data: {
           qty: {
