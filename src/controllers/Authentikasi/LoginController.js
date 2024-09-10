@@ -90,7 +90,7 @@ export const handleLogin = async (req, res) => {
 export const handleRegister = async (req, res) => {
   const { username, password, role } = req.body;
 
-  if (!username || !password) {
+  if (!username || !password || !role) {
     return res.status(400).json({ message: "All fields are required" });
   }
   try {
@@ -108,7 +108,7 @@ export const handleRegister = async (req, res) => {
       data: {
         username: username,
         password: hashedPassword,
-        role: role || "admin",
+        role: role,
       },
     });
 
