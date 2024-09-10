@@ -11,6 +11,7 @@ import ReportRouter from "./src/router/Report/ReportRouter.js";
 import UsulanRouter from "./src/router/Usulan/UsulanRoutes.js";
 import DashboardRouter from "./src/router/Dashboard/DashboardRoute.js";
 import PeminjamanRouter from "./src/router/Peminjaman/PeminjamanRoute.js";
+import { AccesEndpoint } from "./src/Midleware/Midleware.js";
 
 const app = express();
 const port = 5001;
@@ -22,8 +23,8 @@ app.use(
     credentials: true,
   })
 );
-
 app.use("/api/v1", AuthRouter);
+
 app.use("/api/v1", BarangRouter);
 app.use("/api/v1", RuanganRouter);
 app.use("/api/v1", PermintaanRouter);

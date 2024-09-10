@@ -5,12 +5,13 @@ import {
   ReturPeminjaman,
   updateStatusPeminjaman,
 } from "../../controllers/Peminjaman/PostPeminjamanController.js";
+import { AccesEndpoint } from "../../Midleware/Midleware.js";
 
 const PeminjamanRouter = express.Router();
 
-PeminjamanRouter.post("/peminjaman", PostPeminjaman);
-PeminjamanRouter.put("/peminjaman", updateStatusPeminjaman);
-PeminjamanRouter.put("/retur/peminjaman", ReturPeminjaman);
-PeminjamanRouter.post("/filter/peminjaman", getPeminjaman);
+PeminjamanRouter.post("/peminjaman", AccesEndpoint, PostPeminjaman);
+PeminjamanRouter.put("/peminjaman",AccesEndpoint, updateStatusPeminjaman);
+PeminjamanRouter.put("/retur/peminjaman",AccesEndpoint, ReturPeminjaman);
+PeminjamanRouter.post("/filter/peminjaman",AccesEndpoint, getPeminjaman);
 
 export default PeminjamanRouter;

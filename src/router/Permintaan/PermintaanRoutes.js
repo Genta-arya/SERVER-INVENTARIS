@@ -5,10 +5,11 @@ import {
   RejectPermintaan,
   updatePermintaan,
 } from "../../controllers/Permintaan/UpdatePermintaanController.js";
+import { AccesEndpoint } from "../../Midleware/Midleware.js";
 
 const PermintaanRouter = express.Router();
-PermintaanRouter.post("/permintaan", addPermintaan);
-PermintaanRouter.post("/filter/permintaan", getPermintaan);
-PermintaanRouter.put("/permintaan/:id", updatePermintaan);
-PermintaanRouter.put("/reject/permintaan/:id", RejectPermintaan);
+PermintaanRouter.post("/permintaan",AccesEndpoint, addPermintaan);
+PermintaanRouter.post("/filter/permintaan", AccesEndpoint, getPermintaan);
+PermintaanRouter.put("/permintaan/:id", AccesEndpoint,updatePermintaan);
+PermintaanRouter.put("/reject/permintaan/:id", AccesEndpoint,RejectPermintaan);
 export default PermintaanRouter;

@@ -34,7 +34,7 @@ export const handleLogin = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, findUser.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid Credentials" });
+      return res.status(400).json({ message: "Username atau password salah" });
     }
 
     if (findUser.token === null) {

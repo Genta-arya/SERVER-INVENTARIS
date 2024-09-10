@@ -10,14 +10,20 @@ import {
   updateDataNameUser,
 } from "../../controllers/Authentikasi/LoginController.js";
 import { upload } from "../../Config/Firebase.js";
+import { AccesEndpoint } from "../../Midleware/Midleware.js";
 
 const AuthRouter = express.Router();
 AuthRouter.post("/login", handleLogin);
 AuthRouter.post("/user", checkLogin);
-AuthRouter.get("/user", getUser);
-AuthRouter.post("/register", handleRegister);
-AuthRouter.post("/logout", handleLogout);
-AuthRouter.delete("/user/:id", handleDeleteUser);
-AuthRouter.put("/user/name/:id", updateDataNameUser);
-AuthRouter.post("/user/avatar/:id", upload.single("image"), updateAvatarProfil);
+AuthRouter.get("/user", AccesEndpoint, getUser);
+AuthRouter.post("/register", AccesEndpoint, handleRegister);
+AuthRouter.post("/logout", AccesEndpoint, handleLogout);
+AuthRouter.delete("/user/:id", AccesEndpoint, handleDeleteUser);
+AuthRouter.put("/user/name/:id", AccesEndpoint, updateDataNameUser);
+AuthRouter.post(
+  "/user/avatar/:id",
+  upload.single("image"),
+  AccesEndpoint,
+  updateAvatarProfil
+);
 export default AuthRouter;

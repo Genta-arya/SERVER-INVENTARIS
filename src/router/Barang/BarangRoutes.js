@@ -17,16 +17,17 @@ import {
   getBarangMasuk,
   UpdateBarangMasuk,
 } from "../../controllers/Barang/BarangMasuk/PostBarangMasukController.js";
+import { AccesEndpoint } from "../../Midleware/Midleware.js";
 
 const BarangRouter = express.Router();
-BarangRouter.post("/barang/upload", upload.single("image"), handlePostBarang);
-BarangRouter.get("/barang", GetBarang);
-BarangRouter.post("/barang/keluar", getBarangKeluar);
-BarangRouter.put("/barang/:id", handleEditBarang);
-BarangRouter.delete("/barang/:id", DeleteBarang);
+BarangRouter.post("/barang/upload", upload.single("image") ,AccesEndpoint, handlePostBarang);
+BarangRouter.get("/barang", AccesEndpoint, GetBarang);
+BarangRouter.post("/barang/keluar", AccesEndpoint, getBarangKeluar);
+BarangRouter.put("/barang/:id",AccesEndpoint, handleEditBarang);
+BarangRouter.delete("/barang/:id",AccesEndpoint, DeleteBarang);
 BarangRouter.get("/barang/:id", GetSingleBarang);
-BarangRouter.post("/retur/barang", PostReturBarang);
-BarangRouter.post("/barang/masuk", UpdateBarangMasuk);
-BarangRouter.post("/filter/barang/masuk", getBarangMasuk);
-BarangRouter.get("/report/barang/qrcode", PrintQrCode);
+BarangRouter.post("/retur/barang",AccesEndpoint, PostReturBarang);
+BarangRouter.post("/barang/masuk",AccesEndpoint, UpdateBarangMasuk);
+BarangRouter.post("/filter/barang/masuk",AccesEndpoint, getBarangMasuk);
+BarangRouter.get("/report/barang/qrcode",AccesEndpoint, PrintQrCode);
 export default BarangRouter;

@@ -9,12 +9,13 @@ import {
   getDataUsulan,
   getSingleUsulan,
 } from "../../controllers/Usulan/GetUsulanController.js";
+import { AccesEndpoint } from "../../Midleware/Midleware.js";
 
 const UsulanRouter = express.Router();
-UsulanRouter.post("/usulan", PostUsul);
-UsulanRouter.post("/data/usulan", getDataUsulan);
-UsulanRouter.get("/usulan/:id", getSingleUsulan);
-UsulanRouter.put("/usulan/:id", updateStatusUsulan);
-UsulanRouter.put("/nama/usulan/:id", updateNamaBarang);
-UsulanRouter.delete("/usulan/:id", deleteUsul);
+UsulanRouter.post("/usulan", AccesEndpoint, PostUsul);
+UsulanRouter.post("/data/usulan",AccesEndpoint, getDataUsulan);
+UsulanRouter.get("/usulan/:id",AccesEndpoint, getSingleUsulan);
+UsulanRouter.put("/usulan/:id",AccesEndpoint, updateStatusUsulan);
+UsulanRouter.put("/nama/usulan/:id",AccesEndpoint, updateNamaBarang);
+UsulanRouter.delete("/usulan/:id",AccesEndpoint, deleteUsul);
 export default UsulanRouter;
