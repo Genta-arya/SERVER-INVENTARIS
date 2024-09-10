@@ -79,14 +79,16 @@ export const GetReportKIR = async (req, res) => {
 };
 
 export const getReportBarangKeluar = async (req, res) => {
+  const { year } = req.body;
+  const parsedDate = new Date(year);
+  const yearValue = parsedDate.getFullYear();
+  
   try {
-    // Dapatkan tahun saat ini atau tahun yang diinginkan dari query atau gunakan tahun saat ini
-    // const year = parseInt(req.query.year) || new Date().getFullYear();
-    const year = 2025;
-    const startOfYear = new Date(year, 0, 1); // 1 Januari
-    const endOfYear = new Date(year + 1, 0, 1); // 1 Januari tahun berikutnya
 
-    // Ambil semua barang keluar untuk tahun yang ditentukan
+    const startOfYear = new Date(yearValue, 0, 1); 
+    const endOfYear = new Date(yearValue + 1, 0, 1);
+
+
     const barangKeluarData = await prisma.barangKeluar.findMany({
       where: {
         tanggal: {
@@ -165,7 +167,7 @@ export const getReportBarangKeluar = async (req, res) => {
     });
 
     // Mengirimkan hasil ke client
-    res.json({ data: result, tahun: year });
+    res.json({ data: result, tahun: yearValue });
   } catch (error) {
     handleError(res, error);
   }
