@@ -13,11 +13,7 @@ export const getBarangKeluar = async (req, res) => {
   let { date } = req.body;
 
   if (!date) {
-    const today = getIndonesianDate();
-    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
-
-    date = { gte: startOfDay, lt: endOfDay };
+   
   } else {
     const specifiedDate = new Date(date);
     const startOfDay = new Date(specifiedDate.setHours(0, 0, 0, 0));
@@ -27,16 +23,29 @@ export const getBarangKeluar = async (req, res) => {
   }
 
   try {
-    // Ambil semua data barang keluar dengan tanggal yang sesuai, termasuk data barang dan ruangan
-    const barangKeluarData = await prisma.barangKeluar.findMany({
-      where: {
-        tanggal: date,
-      },
-      include: {
-        barang: true,
-        ruangan: true, // Ambil data ruangan
-      },
-    });
+    let barangKeluarData;
+
+
+
+    if (!date) {
+      console.log("tidak ada tanggal");
+      barangKeluarData = await prisma.barangKeluar.findMany({
+        include: {
+          barang: true,
+          ruangan: true, // Ambil data ruangan
+        },
+      });
+    } else {
+      barangKeluarData = await prisma.barangKeluar.findMany({
+        where: {
+          tanggal: date,
+        },
+        include: {
+          barang: true,
+          ruangan: true, // Ambil data ruangan
+        },
+      });
+    }
 
     // Kelompokkan data berdasarkan ruanganId dan barangId serta hitung qty
     const rekapQtyKeluarRuangId = barangKeluarData.reduce((acc, item) => {

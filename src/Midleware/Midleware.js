@@ -7,27 +7,27 @@ export const AccesEndpoint = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
-    // Cek apakah Authorization header ada dan dimulai dengan 'Bearer'
+    
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res
         .status(401)
         .json({ message: "Silahkan Login" });
     }
 
-    // Ambil token dari Authorization header
+    
     const token = authHeader.split(" ")[1];
 
-    // Cek apakah token ada di database
+
     const findToken = await prisma.user.findFirst({
       where: { token: token },
     });
 
-    // Jika token tidak ditemukan di database, unauthorized
+    
     if (!findToken) {
       return res.status(401).json({ message: "Silahkan Login" });
     }
 
-    // Jika token ditemukan, lanjutkan dengan verifikasi JWT
+    
     jwt.verify(token, JWT_SECRET, async (err, decoded) => {
       if (err) {
         console.log(err);

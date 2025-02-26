@@ -35,13 +35,7 @@ export const getPeminjaman = async (req, res) => {
   console.log(date);
 
   if (!date) {
-    const today = getIndonesianDate();
-    const startOfDay = new Date(today);
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(today);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    date = { gte: startOfDay, lt: endOfDay };
+  
   } else {
     const specifiedDate = new Date(date);
     const startOfDay = new Date(specifiedDate);
@@ -52,14 +46,26 @@ export const getPeminjaman = async (req, res) => {
     date = { gte: startOfDay, lt: endOfDay };
   }
   try {
-    const peminjaman = await prisma.peminjaman.findMany({
-      where: {
-        createdAt: date,
-      },
-      include: {
-        barang: true,
-      },
-    });
+    let peminjaman;
+
+    if (!date) {
+      console.log("tidak ada tanggal");
+      peminjaman = await prisma.peminjaman.findMany({
+        include: {
+          barang: true,
+        },
+      });
+    } else {
+      peminjaman = await prisma.peminjaman.findMany({
+        where: {
+          createdAt: date,
+        },
+        include: {
+          barang: true,
+        },
+      });
+    }
+   
     return res.status(200).json({
       message: "Data peminjaman",
       data: peminjaman,
