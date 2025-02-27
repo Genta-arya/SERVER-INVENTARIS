@@ -155,12 +155,12 @@ export const handlePostBarang = async (req, res) => {
       formData.append("file", fs.createReadStream(tempPath));
 
       const uploadResponse = await uploadProfile(formData);
-      
+
       fotoURL = uploadResponse.data.file_url; // Pastikan respons mengandung URL yang valid
     }
 
     // Generate QR code
-    const qrCodeData = `${process.env.URL_QR}/detail/${newBarang.id}`;
+    const qrCodeData = `https://siaska.smkn2ketapang.sch.id/detail/${newBarang.id}`;
     const qrCodeImage = await QRCode.toBuffer(qrCodeData, {
       errorCorrectionLevel: "H",
       type: "png",
@@ -173,7 +173,6 @@ export const handlePostBarang = async (req, res) => {
 
     const qrUploadResponse = await uploadProfile(formDataQR);
     qrCodeURL = qrUploadResponse.data.file_url;
-
 
     newBarang = await prisma.barang.update({
       where: { id: newBarang.id },
