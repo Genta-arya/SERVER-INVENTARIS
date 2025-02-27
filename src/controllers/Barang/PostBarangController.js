@@ -1,11 +1,16 @@
 import prisma from "../../../prisma/Config.js";
 import { handleError } from "../../utils/errorHandler.js";
 import path from "path";
-import fs from "fs/promises";
+
 import QRCode from "qrcode";
 import { storage } from "../../Config/Firebase.js";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import formidable from "formidable";
+import FormData from "form-data";
+import fs from "fs";
+
+import os from "os";
+import { uploadProfile } from "../../Config/Uploads.js";
 const BASE_URL = process.env.BASE_URL || "http://localhost:5001";
 const URL_QR = "https://web-invetaris.vercel.app/";
 // export const handlePostBarang = async (req, res) => {
@@ -122,7 +127,8 @@ export const handlePostBarang = async (req, res) => {
   }
 
   let newBarang;
-
+  let fotoURL = null;
+  let qrCodeURL = null;
   try {
     // Buat barang baru di database
     newBarang = await prisma.barang.create({
@@ -143,37 +149,37 @@ export const handlePostBarang = async (req, res) => {
 
     // Upload foto ke Firebase Storage
     if (req.file && req.file.buffer) {
-      const imageBuffer = req.file.buffer; // Pastikan req.file.buffer ada
-      console.log(req.file);
+      const tempPath = path.join(os.tmpdir(), req.file.originalname);
+      fs.writeFileSync(tempPath, req.file.buffer);
+      const formData = new FormData();
+      formData.append("file", fs.createReadStream(tempPath));
 
-      const storageRef = ref(storage, `images/${req.file.originalname}`);
-      const snapshot = await uploadBytes(storageRef, imageBuffer);
-      const fotoURL = await getDownloadURL(snapshot.ref);
-
-      // Generate QR code
-      const qrCodeData = `${URL_QR}/detail/${newBarang.id}`;
-      const qrCodeImage = await QRCode.toBuffer(qrCodeData, {
-        errorCorrectionLevel: "H",
-        type: "png",
-        width: 300,
-      });
-
-      // Upload QR code ke Firebase Storage
-      const qrStorageRef = ref(
-        storage,
-        `qrcodes/${namaBarang}-${newBarang.id}.png`
-      );
-      const qrSnapshot = await uploadBytes(qrStorageRef, qrCodeImage);
-      const qrCodeURL = await getDownloadURL(qrSnapshot.ref);
-
-      // Update barang dengan URL dari Firebase Storage
-      newBarang = await prisma.barang.update({
-        where: { id: newBarang.id },
-        data: { foto: fotoURL, imageBarcode: qrCodeURL },
-      });
+      const uploadResponse = await uploadProfile(formData);
+      
+      fotoURL = uploadResponse.data.file_url; // Pastikan respons mengandung URL yang valid
     }
 
-    // Kembalikan respons dengan data barang yang diperbarui
+    // Generate QR code
+    const qrCodeData = `${process.env.URL_QR}/detail/${newBarang.id}`;
+    const qrCodeImage = await QRCode.toBuffer(qrCodeData, {
+      errorCorrectionLevel: "H",
+      type: "png",
+      width: 300,
+    });
+
+    // Upload QR code ke penyimpanan eksternal
+    const formDataQR = new FormData();
+    formDataQR.append("file", qrCodeImage, `qrcode-${newBarang.id}.png`);
+
+    const qrUploadResponse = await uploadProfile(formDataQR);
+    qrCodeURL = qrUploadResponse.data.file_url;
+
+
+    newBarang = await prisma.barang.update({
+      where: { id: newBarang.id },
+      data: { foto: fotoURL, imageBarcode: qrCodeURL },
+    });
+
     res.status(201).json(newBarang);
   } catch (error) {
     // Jika ada kesalahan pada salah satu langkah, hapus data barang yang telah dibuat

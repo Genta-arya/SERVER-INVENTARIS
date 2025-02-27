@@ -104,29 +104,29 @@ export const DeleteBarang = async (req, res) => {
         });
 
         // 4. Hapus gambar dari Firebase Storage
-        if (barang.foto) {
-            const fotoPath = decodeURIComponent(barang.foto.split('/o/')[1].split('?')[0]);
-            const fotoRef = ref(storage, fotoPath);
-            try {
-                console.log(`Attempting to delete file at path: ${fotoPath}`);
-                await deleteObject(fotoRef);
-                console.log(`File deleted successfully at path: ${fotoPath}`);
-            } catch (error) {
-                console.error('Error deleting foto:', error);
-            }
-        }
+        // if (barang.foto) {
+        //     const fotoPath = decodeURIComponent(barang.foto.split('/o/')[1].split('?')[0]);
+        //     const fotoRef = ref(storage, fotoPath);
+        //     try {
+        //         console.log(`Attempting to delete file at path: ${fotoPath}`);
+        //         await deleteObject(fotoRef);
+        //         console.log(`File deleted successfully at path: ${fotoPath}`);
+        //     } catch (error) {
+        //         console.error('Error deleting foto:', error);
+        //     }
+        // }
 
-        if (barang.imageBarcode) {
-            const barcodePath = decodeURIComponent(barang.imageBarcode.split('/o/')[1].split('?')[0]);
-            const barcodeRef = ref(storage, barcodePath);
-            try {
-                console.log(`Attempting to delete file at path: ${barcodePath}`);
-                await deleteObject(barcodeRef);
-                console.log(`File deleted successfully at path: ${barcodePath}`);
-            } catch (error) {
-                console.error('Error deleting imageBarcode:', error);
-            }
-        }
+        // if (barang.imageBarcode) {
+        //     const barcodePath = decodeURIComponent(barang.imageBarcode.split('/o/')[1].split('?')[0]);
+        //     const barcodeRef = ref(storage, barcodePath);
+        //     try {
+        //         console.log(`Attempting to delete file at path: ${barcodePath}`);
+        //         await deleteObject(barcodeRef);
+        //         console.log(`File deleted successfully at path: ${barcodePath}`);
+        //     } catch (error) {
+        //         console.error('Error deleting imageBarcode:', error);
+        //     }
+        // }
 
         // 5. Kirim respons sukses
         res.status(200).json({ message: 'Barang berhasil dihapus' });
