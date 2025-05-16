@@ -262,7 +262,7 @@ tahun,
         nomorRegister,
         merkType,
         ukuran,
-     parseInt(tahun),
+    tahun: parseInt(tahun),
 
         jenis,
         hargaBarang: parseInt(hargaBarang),
