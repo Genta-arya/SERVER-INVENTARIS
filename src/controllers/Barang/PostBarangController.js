@@ -273,6 +273,7 @@ tahun,
 
     res.status(200).json({ message: "Barang Berhasil diupdate" });
   } catch (error) {
+    console.log(error);
     handleError(res, error);
   }
 };
