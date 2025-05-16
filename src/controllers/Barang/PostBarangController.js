@@ -246,7 +246,8 @@ tahun,
     });
 
     console.log(id);
-    if (existingBarang.id !== id) {
+if (existingBarang && existingBarang.id !== id) {
+
       return res.status(400).json({
         message: "Nama barang sudah ada. Harap gunakan nama lain.",
       });
