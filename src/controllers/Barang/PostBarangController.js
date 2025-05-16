@@ -99,6 +99,7 @@ export const handlePostBarang = async (req, res) => {
     nomorRegister,
     merkType,
     ukuran,
+    tahun,
 
     jenis,
     hargaBarang,
@@ -140,7 +141,7 @@ export const handlePostBarang = async (req, res) => {
         ukuran,
         jenis,
         qty: 0,
-        tahun: new Date().getFullYear(),
+        tahun: tahun || new Date().getFullYear(),
         hargaBarang: parseInt(hargaBarang),
         kondisi,
         perolehan,
@@ -199,7 +200,7 @@ export const handleEditBarang = async (req, res) => {
     nomorRegister,
     merkType,
     ukuran,
-
+tahun,
     jenis,
     hargaBarang,
     kondisi,
@@ -261,6 +262,7 @@ export const handleEditBarang = async (req, res) => {
         nomorRegister,
         merkType,
         ukuran,
+        tahun,
 
         jenis,
         hargaBarang: parseInt(hargaBarang),
