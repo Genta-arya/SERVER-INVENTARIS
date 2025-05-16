@@ -44,35 +44,70 @@ export const UpdateBarangMasuk = async (req, res) => {
   }
 };
 
+// export const getBarangMasuk = async (req, res) => {
+//   let { date } = req.body;
+
+//   // Menentukan rentang tanggal
+//   if (!date) {
+//     const today = getIndonesianDate();
+//     const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+//     const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+//     date = { gte: startOfDay, lt: endOfDay };
+//   } else {
+//     const specifiedDate = new Date(date);
+//     const startOfDay = new Date(specifiedDate.setHours(0, 0, 0, 0));
+//     const endOfDay = new Date(specifiedDate.setHours(23, 59, 59, 999));
+//     date = { gte: startOfDay, lt: endOfDay };
+//   }
+
+//   try {
+//     // Mengambil data barang masuk dari database
+//     const barangMasuk = await prisma.barangMasuk.findMany({
+//       where: {
+//         tanggal: date,
+        
+//       },
+//       select: {
+//         keterangan: true,
+//         qty: true,
+//         tanggal: true,
+//         barang: true,
+        
+//       },
+//       orderBy: {
+//         tanggal: "desc",
+//       },
+//     });
+
+//     res.status(200).json({ data: barangMasuk });
+//   } catch (error) {
+//     handleError(res, error);
+//   }
+// };
+
+
 export const getBarangMasuk = async (req, res) => {
   let { date } = req.body;
 
-  // Menentukan rentang tanggal
-  if (!date) {
-    const today = getIndonesianDate();
-    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
-    date = { gte: startOfDay, lt: endOfDay };
-  } else {
+  let dateFilter = undefined;
+
+  if (date) {
     const specifiedDate = new Date(date);
     const startOfDay = new Date(specifiedDate.setHours(0, 0, 0, 0));
     const endOfDay = new Date(specifiedDate.setHours(23, 59, 59, 999));
-    date = { gte: startOfDay, lt: endOfDay };
+    dateFilter = { gte: startOfDay, lt: endOfDay };
   }
 
   try {
-    // Mengambil data barang masuk dari database
     const barangMasuk = await prisma.barangMasuk.findMany({
-      where: {
-        tanggal: date,
-        
-      },
+      where: dateFilter
+        ? { tanggal: dateFilter }
+        : undefined, // Jangan filter tanggal kalau tidak dikirim
       select: {
         keterangan: true,
         qty: true,
         tanggal: true,
         barang: true,
-        
       },
       orderBy: {
         tanggal: "desc",
@@ -84,3 +119,4 @@ export const getBarangMasuk = async (req, res) => {
     handleError(res, error);
   }
 };
+
